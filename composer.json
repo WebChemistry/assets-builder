@@ -10,7 +10,9 @@
 		"nette/di": "^3.0.0"
 	},
 	"autoload": {
-		"WebChemistry\\AssetsBuilder\\": ["src/"]
+		"psr-4": {
+			"WebChemistry\\AssetsBuilder\\": ["src/"]
+		}
 	},
 	"minimum-stability": "RC"
 }

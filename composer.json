@@ -9,5 +9,8 @@
 	"require-dev": {
 		"nette/di": "^3.0.0"
 	},
+	"autoload": {
+		"WebChemistry\\AssetsBuilder\\": ["src/"]
+	},
 	"minimum-stability": "RC"
 }

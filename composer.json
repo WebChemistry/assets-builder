@@ -1,0 +1,13 @@
+{
+	"name": "webchemistry/assets-builder",
+	"type": "library",
+	"require": {
+		"php": ">= 7.1",
+		"nette/utils": "^3.0.0",
+		"nette/http": "^3.0.0"
+	},
+	"require-dev": {
+		"nette/di": "^3.0.0"
+	},
+	"minimum-stability": "RC"
+}

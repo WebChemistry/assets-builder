@@ -13,6 +13,7 @@ final class AssetsBuilderExtension extends CompilerExtension {
 	public $defaults = [
 		'css' => [],
 		'js' => [],
+		'manifests' => [],
 		'nonceProvider' => NonceProvider::class
 	];
 
@@ -27,6 +28,9 @@ final class AssetsBuilderExtension extends CompilerExtension {
 		$assets = $builder->addDefinition($this->prefix('assetsBuilder'))
 			->setFactory(AssetsBuilder::class);
 
+		foreach ($config['manifests'] as $name => $options) {
+			$assets->addSetup('addManifest', [$name, $options['manifest'], $options['styles'], $options['javascript']]);
+		}
 		foreach ($config['css'] as $css) {
 			$assets->addSetup('addCss', [$css]);
 		}

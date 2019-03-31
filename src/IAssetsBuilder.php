@@ -6,6 +6,8 @@ use Nette\Utils\Html;
 
 interface IAssetsBuilder {
 
+	public function addManifest(string $name, string $manifest, array $styles, array $javascript): IAssetsBuilder;
+
 	public function addCss(string $css): IAssetsBuilder;
 
 	public function addJs(string $js): IAssetsBuilder;

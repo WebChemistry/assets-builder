@@ -6,6 +6,9 @@ use Nette\Http\IRequest;
 use Nette\Http\IResponse;
 use Nette\SmartObject;
 use Nette\Utils\Html;
+use Nette\Utils\Json;
+use Nette\Utils\Strings;
+use WebChemistry\Asserts\FileSystemAssert;
 use WebChemistry\AssetsBuilder\Nonce\INonceProvider;
 
 class AssetsBuilder implements IAssetsBuilder {
@@ -17,6 +20,9 @@ class AssetsBuilder implements IAssetsBuilder {
 
 	/** @var string[] */
 	protected $js = [];
+
+	/** @var string[] */
+	protected $manifests = [];
 
 	/** @var INonceProvider */
 	private $nonceProvider;
@@ -33,7 +39,37 @@ class AssetsBuilder implements IAssetsBuilder {
 		$this->response = $response;
 	}
 
+	public function addManifest(string $name, string $manifest, array $styles, array $javascript): IAssetsBuilder {
+		FileSystemAssert::fileExists($manifest);
+		$array = Json::decode(file_get_contents($manifest), Json::FORCE_ARRAY);
+
+		$this->manifests[$name] = [
+			'css' => [],
+			'js' => [],
+		];
+
+		foreach ($styles as $original => $style) {
+			if (!isset($array[$original])) {
+				throw new AssetsBuilderException("$original not exists in manifest.");
+			}
+
+			$this->manifests[$name]['css'][$original] = str_replace('$name', $array[$original], $style);
+		}
+
+		foreach ($javascript as $original => $javascript) {
+			if (!isset($array[$original])) {
+				throw new AssetsBuilderException("$original not exists in manifest.");
+			}
+
+			$this->manifests[$name]['js'][$original] =  str_replace('$name', $array[$original], $javascript);;
+		}
+
+		return $this;
+	}
+
 	public function addCss(string $css, ?bool $absolute = null): IAssetsBuilder {
+		$css = $this->findFromManifest($css, 'css');
+
 		if ($absolute === false || ($absolute === null && !Utils::isAbsoluteUrl($css))) {
 			$css = $this->request->getUrl()->getBasePath() . ltrim($css, '/');
 		}
@@ -44,6 +80,8 @@ class AssetsBuilder implements IAssetsBuilder {
 	}
 
 	public function addJs(string $js, ?bool $absolute = null): IAssetsBuilder {
+		$js = $this->findFromManifest($js, 'js');
+
 		if ($absolute === false || ($absolute === null && !Utils::isAbsoluteUrl($js))) {
 			$js = $this->request->getUrl()->getBasePath() . ltrim($js, '/');
 		}
@@ -51,6 +89,20 @@ class AssetsBuilder implements IAssetsBuilder {
 		$this->js[] = $js;
 
 		return $this;
+	}
+
+	protected function findFromManifest(string $path, string $section): string {
+		if (preg_match('#^\$(\w+)/([\w+\.\-]+)$#', $path, $matches)) {
+			if (!isset($this->manifests[$matches[1]])) {
+				throw new AssetsBuilderException("Manifest $matches[1] not exists.");
+			}
+			if (!isset($this->manifests[$matches[1]][$section][$matches[2]])) {
+				throw new AssetsBuilderException("Manifest $matches[1] does not have $matches[2].");
+			}
+			$path = $this->manifests[$matches[1]][$section][$matches[2]];
+		}
+
+		return $path;
 	}
 
 	public function preload(): void {
@@ -86,7 +138,6 @@ class AssetsBuilder implements IAssetsBuilder {
 				'rel' => 'stylesheet',
 				'href' => $css,
 			]);
-			bdump($child);
 		}
 
 		return $wrapper;

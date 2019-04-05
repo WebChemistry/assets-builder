@@ -14,6 +14,5 @@
 		"psr-4": {
 			"WebChemistry\\AssetsBuilder\\": ["src/"]
 		}
-	},
-	"minimum-stability": "RC"
+	}
 }

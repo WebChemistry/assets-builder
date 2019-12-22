@@ -2,10 +2,13 @@
 
 namespace WebChemistry\AssetsBuilder;
 
+use Nette\Application\IPresenter;
 use Nette\Utils\Html;
 
 interface IAssetsBuilder {
 
+	public function createPreloadAnchor(IPresenter $presenter): void;
+	
 	public function addCss(string $css): IAssetsBuilder;
 
 	public function addJs(string $js): IAssetsBuilder;

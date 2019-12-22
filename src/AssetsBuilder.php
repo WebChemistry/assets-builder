@@ -2,12 +2,11 @@
 
 namespace WebChemistry\AssetsBuilder;
 
+use Nette\Application\IPresenter;
 use Nette\Http\IRequest;
 use Nette\Http\IResponse;
 use Nette\SmartObject;
 use Nette\Utils\Html;
-use Nette\Utils\Json;
-use Nette\Utils\Strings;
 use WebChemistry\AssetsBuilder\Nonce\INonceProvider;
 
 class AssetsBuilder implements IAssetsBuilder {
@@ -62,6 +61,14 @@ class AssetsBuilder implements IAssetsBuilder {
 		foreach ($this->js as $js) {
 			$this->response->addHeader('Link', "<$js>; rel=preload; as=script");
 		}
+	}
+
+	public function createPreloadAnchor(IPresenter $presenter): void {
+		$presenter->onStartup[] = function (IPresenter $presenter) {
+			if (!$presenter->isAjax()) {
+				$this->preload();
+			}
+		};
 	}
 
 	public function buildJs(): Html {

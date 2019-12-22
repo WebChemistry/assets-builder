@@ -8,6 +8,7 @@ use Nette\Schema\Schema;
 use Nette\Utils\Json;
 use WebChemistry\AssetsBuilder\AssetsBuilder;
 use WebChemistry\AssetsBuilder\AssetsBuilderException;
+use WebChemistry\AssetsBuilder\AssetsBuilderManager;
 use WebChemistry\AssetsBuilder\Nonce\INonceProvider;
 use WebChemistry\AssetsBuilder\Nonce\NonceProvider;
 use Webmozart\Assert\Assert;
@@ -44,6 +45,9 @@ final class AssetsBuilderExtension extends CompilerExtension {
 			->setType(INonceProvider::class)
 			->setFactory($config->nonceProvider);
 
+		$manager = $builder->addDefinition($this->prefix('assetsBuilderManager'))
+			->setType(AssetsBuilderManager::class);
+
 		foreach ($config->manifests as $name => $info) {
 			$this->processManifest($name, $info);
 
@@ -67,6 +71,8 @@ final class AssetsBuilderExtension extends CompilerExtension {
 				$js = $this->findFromManifest($js, 'js');
 				$assets->addSetup('addJs', [$js]);
 			}
+
+			$manager->addSetup('addBuilder', [$name, $assets]);
 
 			$first = false;
 		}

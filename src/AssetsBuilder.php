@@ -3,10 +3,13 @@
 namespace WebChemistry\AssetsBuilder;
 
 use Nette\Application\IPresenter;
+use Nette\Application\UI\Presenter;
 use Nette\Http\IRequest;
 use Nette\Http\IResponse;
 use Nette\SmartObject;
 use Nette\Utils\Html;
+use Nette\Utils\Json;
+use Nette\Utils\Strings;
 use WebChemistry\AssetsBuilder\Nonce\INonceProvider;
 
 class AssetsBuilder implements IAssetsBuilder {
@@ -64,7 +67,7 @@ class AssetsBuilder implements IAssetsBuilder {
 	}
 
 	public function createPreloadAnchor(IPresenter $presenter): void {
-		$presenter->onStartup[] = function (IPresenter $presenter) {
+		$presenter->onRender[] = function (IPresenter $presenter): void {
 			if (!$presenter->isAjax()) {
 				$this->preload();
 			}

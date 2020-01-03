@@ -27,6 +27,7 @@ final class AssetsBuilderExtension extends CompilerExtension {
 					'javascript' => Expect::arrayOf('string')->default([]),
 				])
 			),
+			'enabled' => Expect::bool(true),
 			'nonceProvider' => Expect::string(NonceProvider::class),
 			'sources' => Expect::arrayOf(
 				Expect::structure([
@@ -40,6 +41,10 @@ final class AssetsBuilderExtension extends CompilerExtension {
 	public function loadConfiguration(): void {
 		$builder = $this->getContainerBuilder();
 		$config = $this->getConfig();
+
+		if (!$config->enabled) {
+			return;
+		}
 
 		$builder->addDefinition($this->prefix('nonceProvider'))
 			->setType(INonceProvider::class)
